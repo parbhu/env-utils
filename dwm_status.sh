@@ -12,7 +12,7 @@ while true; do
 	fi
 
 	UPTIME=$(uptime | awk '{ print $3 $4}')
-	LOCALTIME=$(date "+W:%U | %F  %a | %H:%M")
+	LOCALTIME=$(date "+W:%U | %F  %a  %H:%M")
 	CHARGE=$(acpi -b | awk '{ print $4 }')
 
 	xsetroot -name "$TYPE:$CHARGE  |  U:$UPTIME  |  $LOCALTIME"
