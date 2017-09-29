@@ -1,0 +1,16 @@
+Host t-small-node1
+	User root
+	ProxyCommand ssh -q daly nc -q0 192.168.123.101 22
+
+Host 10.0.0.*
+     StrictHostKeyChecking no
+
+Host github.com
+HostName ssh.github.com
+Port 443
+User parbhu
+IdentityFile ~/.ssh/id_rsa_github.pub
+
+Host git.code.sf.net
+User qparbhu
+IdentityFile ~/.ssh/id_rsa_sf.pub
