@@ -1,5 +1,7 @@
 # To set Mouse map to Left-Hand mouse
-# xinput set-button-map 10 3 2 1 4 5 6 7 8 9 10 11 12 13 14 15 16
+
+id=$(xinput | grep -Eo "Mouse.*id=[0-9]+" | grep -Eo "[0-9]+")
+xinput set-button-map $id 3 2 1 4 5 6 7 8 9 10 11 12 13 14 15 16
 
 DWM_RENEW_INT=30;
 

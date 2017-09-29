@@ -1,0 +1,54 @@
+[user]
+	email = parthasarathy.bhuvaragan@ericsson.com
+	name = Parthasarathy Bhuvaragan
+[core]
+	pager = less -FRXS
+	editor = vim
+	abbrev = 12
+[color]
+	branch = auto
+	diff = auto 
+	interactive = auto
+	status = auto
+[url "ssh://git.code.sf.net"]
+    pushInsteadOf = git://git.code.sf.net
+[alias]
+	stree = log --since='one week ago' --graph --pretty=oneline --abbrev-commit --decorate --color
+	tree = log --graph --abbrev-commit --decorate=full --color --oneline
+	ftree = log --graph --pretty=oneline --abbrev-commit --all --decorate --color
+#	lines = log --pretty=\"%C(cyan) %ci %C(green) %cn  %C(yellow) %h %C(reset) %s\"
+	lines = log --date=short --pretty=\"%C(cyan)%ad %C(green)%aN  %C(yellow)%h %C(reset)%s\"
+	flog = log --decorate=full --full-diff
+	signoff-rebase = "!GIT_SEQUENCE_EDITOR='sed -i -re s/^pick/e/' sh -c 'git rebase -i $1 && while git rebase --continue; do git commit --amend --signoff --no-edit; done' -"a
+	pdiff="!f() { git diff $1~1 $1 $2 $3; }; f"
+	apply-include="!f() { git show $1 -- include | git apply -p4 -v --directory=net/tipc/; }; f" 
+#	flog = log --decorate=full --full-diff --remotes=remotes/mainline/master
+
+#   to show fewer outputs, you can use : 
+#   -n 100 => show only 100 commits
+#   -since="1 week ago"
+#   -grep "pattern"
+	refresh = submodule update --recursive
+	ldiff= diff --no-index
+	lidiff= diff --no-index -w --ignore-blank-lines
+[push]
+	default = matching
+[pretty]
+	fixes = Fixes: %h (\"%s\")
+[sendemail]
+	chainreplyto = false
+#       smtpserver = mail2.internal.ericsson.com
+	smtpserver = ESESSHC011.ss.sw.ericsson.se
+	smtpencryption = tls
+#       smtpserver = esessmw0184.eemea.ericsson.se
+	smtpuser = qparbhu
+	smtpserverport = 25
+#	from = parthasarathy.bhuvaragan@ericsson.com
+	smtpsslcertpath = /etc/ssl/certs/ca-bundle.trust.crt
+	suppresscc = self
+	aliasesfile = /home/qparbhu/.git_aliases
+	aliasfiletype = mutt
+#	FromLineOverride=YES
+
+#[rerere]
+#	enabled = true
