@@ -162,8 +162,7 @@ set ffs=unix,dos,mac
 " Turn backup off, since most stuff is in SVN, git et.c anyway...
 set nobackup
 set nowb
-set noswapfile
-
+set directory=~/.swp//
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Text, tab and indent related
@@ -329,6 +328,9 @@ map <leader>p :cp<cr>
 " => Spell checking
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Pressing ,ss will toggle and untoggle spell checking
+setglobal spell spelllang=en_gb
+setlocal spell spelllang=en_gb
+
 map <leader>ss :setlocal spell!<cr>
 
 " Shortcuts using <leader>
