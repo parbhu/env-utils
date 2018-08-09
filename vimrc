@@ -53,6 +53,7 @@ set tabstop=4
 filetype plugin on
 filetype indent on
 
+let g:linuxsty_patterns = [ "/linux/", "/kernel/" , "/drivers"]
 " Set to auto read when a file is changed from the outside
 set autoread
 
@@ -133,6 +134,8 @@ set foldcolumn=1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Enable syntax highlighting
 syntax enable
+set splitright
+
 
 try
     colorscheme elflord
@@ -213,6 +216,13 @@ map <C-l> <C-W>l
 " Close the current buffer
 map <leader>bd :Bclose<cr>
 
+" Open current buffer in a new split
+" nnoremap <leader>v :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
+nnoremap <silent><Leader><C-]> <C-w><C-]><C-w>T
+map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
+" nnoremap <C-]> :tabnew %<CR>g<C-]>
+" vnoremap <C-]> <Esc>:tabnew %<CR>gvg<C-]>
+
 " Close all the buffers
 map <leader>ba :1,1000 bd!<cr>
 
@@ -244,7 +254,7 @@ autocmd BufReadPost *
      \ endif
 " Remember info about open buffers on close
 set viminfo^=%
-
+autocmd QuickFixCmdPost *grep* cwindow
 
 """"""""""""""""""""""""""""""
 " => Status line
@@ -328,10 +338,10 @@ map <leader>p :cp<cr>
 " => Spell checking
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Pressing ,ss will toggle and untoggle spell checking
-setglobal spell spelllang=en_gb
-setlocal spell spelllang=en_gb
+"setglobal spell spelllang=en_gb
+"setlocal spell spelllang=en_gb
 
-map <leader>ss :setlocal spell!<cr>
+"map <leader>ss :setlocal spell!<cr>
 
 " Shortcuts using <leader>
 map <leader>sn ]s
@@ -413,3 +423,18 @@ function! <SID>BufcloseCloseIt()
      execute("bdelete! ".l:currentBufNum)
    endif
 endfunction
+
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+let g:netrw_browse_split = 2
+let g:netrw_altv = 1
+let g:netrw_winsize = 25
+map <F2> :Vexplore<CR>
+func! Hide_cur_window_or_quit_vim()
+    if winnr('$') > 1
+        hide
+    else
+        silent! exec 'q'
+    endif
+endfunc
+map <F3> :call Hide_cur_window_or_quit_vim()<CR>
