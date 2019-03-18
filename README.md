@@ -3,6 +3,11 @@ env-utils
 
 Set of utities for environment settings.. for dwm, bash, vim etc..
 
+For gnome3 with dwm, use this repo:
+------------------------------------
+https://github.com/palopezv/dwm-gnome
+
+
 Setting dwm as the dm:
 ------------------------
 cat > /etc/lightdm/lightdm.conf.d/50-dwm.conf
