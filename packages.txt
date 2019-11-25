@@ -1,0 +1,9 @@
+vim
+dwm
+exuberant-ctags
+cscope
+linux-tools
+linux-cloud-tools
+sparse
+git
+

@@ -1,13 +1,13 @@
 set ssl_starttls=yes
 set ssl_force_tls=yes
-set imap_user = "parthasarathy.bhuvaragan@ericsson.com"
+set imap_user = "parthasarathy.bhuvaragan@gmail.com"
 #set imap_pass = ""
-set from="parthasarathy.bhuvaragan@ericsson.com"
+set from="parthasarathy.bhuvaragan@gmail.com"
 set realname="Parthasarathy Bhuvaragan"
 set folder = "imaps://outlook.office365.com:993"
 set spoolfile = "+INBOX/tipc"
 set postponed="Drafts"
-set smtp_url = "smtp://parthasarathy.bhuvaragan@ericsson.com@smtp.office365.com:587"
+set smtp_url = "smtp://parthasarathy.bhuvaragan@gmail.com:587"
 set move = no
 set imap_keepalive = 900
 set editor = "vim"

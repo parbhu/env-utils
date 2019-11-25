@@ -1,0 +1,4 @@
+set scroll off
+mod -S /home/partha/monorepo/src/platform/drivers
+extend /usr/lib/crash/extensions/trace.so
+bt -lFFF

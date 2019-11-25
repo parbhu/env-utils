@@ -1,0 +1,264 @@
+alias mono='export MONOREPO_ROOT=$(git rev-parse --show-toplevel)'
+
+# The cscope.db are laidout for cscope.vim to find the right
+# symbol based on the priority. We load multiple .db to vim.
+__pcsbuild() {
+	ROOT=$(git rev-parse --show-toplevel)
+	# keep edgeware cscope.db at platform/drivers level
+	cd "$ROOT/src/platform/drivers"
+	rm -f cscope*
+	find $ROOT \
+		-not \( -path $ROOT/src/platform/linux -prune \) \
+		-not \( -path $ROOT/src/isa-gw -prune \) \
+		-not \( -path $ROOT/src/platform/test/utest/stub -prune \) \
+		-type f \( -name "*.c*" -o -name "*.h*" \) -print > cscope.files
+	cscope -bqk
+	cd -
+}
+alias pcsbuild=__pcsbuild
+
+__lisacsbuild() {
+	rm -f cscope*
+	find $PWD -type f \( -name "*.c*" -o -name "*.h*" \) -print > ./cscope.files
+	cat ~/Projects/linux/cscope.files >> ./cscope.files
+	cscope -bqk
+}
+alias lisacsbuild=__lisacsbuild
+
+export driver=~/"monorepo/src/platform/drivers"
+export ehsd=~/"monorepo/src/esb2001/local/httpd/ehs"
+export jcache=~/"monorepo/src/esb2001/local/lib/jcache"
+export tools=~/"monorepo/src/platform/tools"
+export platform=~/"monorepo/src/platform/"
+__csbuild() {
+	rm -f cscope*
+	find $PWD -type f \( -name "*.c*" -o -name "*.h*" \) -print > ./cscope.files
+	cscope -bq
+}
+alias csbuild=__csbuild
+alias l='ls -ltr'
+alias ship="ip a | egrep '^[0-9]+|inet '"
+alias lihome="cd /mnt/lithium/home/partha.bhuvaragan"
+alias liplat="lihome && cd monorepo/src/platform/drivers"
+
+# Brute Force search tools
+alias findc='find . -name \*.c | xargs grep -ins'
+alias finds='find . -name \*.c -o -name \*.h | xargs grep -ins'
+alias findx='find . -name \* | xargs grep -ins'
+alias findh='find . -name \*.h | xargs grep -ins'
+
+# Build driver
+alias bdriver="docker-make check-local && docker-make TARGET=strontium-e -j 4"
+
+__sync_driver() {
+	if [ $# -eq 1 ]; then
+		LINUX=$(grep LINUX ../../../DEPENDENCIES | cut -d= -f 2)
+		NAME=$(git describe --dirty --tags --match esb2001*)
+		TARGET="/non-volatile/patches/driver_$NAME/lib/modules/$LINUX/"
+		docker-make TARGET=strontium-e -j 4 && ssh root@$1 "rm -rf $TARGET" &&\
+			ssh root@$1 "rm -rf /non-volatile/patches/driver* && mkdir -p $TARGET" &&\
+		    scp -r */*.ko "root@$1:$TARGET" &&\
+			ssh root@$1 "/usr/sbin/reboot-skip-bios"
+	else
+		echo "$0 <node_ip>"
+	fi
+}
+alias sync_driver=__sync_driver
+
+# My docker resource restrictions
+alias dmake="docker-make run --cpuset-cpus 0,2 --memory 1G --memory-swap 0"
+
+# Build image
+__build_image() {
+	local BUILD="$HOME/build_mono/$(git rev-parse --abbrev-ref HEAD)"
+	local NAME=$(git describe --dirty --tags --match esb2001*)
+	git clean -fdx -- ./src/platform/drivers
+	sudo rm -rf $BUILD
+	cd "$(git rev-parse --show-toplevel)/src/esb2001/"
+
+	echo ./build/scripts/docker-build-installer -t strontium-e -j $(nproc) -d $BUILD -n $NAME
+	./build/scripts/docker-build-installer -t strontium-e -j $(nproc) -d $BUILD -n $NAME
+}
+alias bimage="pushd . && __build_image && popd"
+
+__vig() {
+	vi '+/'"$1" $(git grep -l "$1")
+}
+alias vig=__vig
+
+alias cpatch='git diff | ~/linux/linux-4.1.19/scripts/checkpatch.pl --no-tree --no-signoff -'
+alias csmatch='make CHECK="/mnt/lithium/platform/kernel/tools/smatch/smatch -p=kernel --full-path" C=1'
+alias csparse='make CHECK="/mnt/lithium/platform/kernel/tools/sparse/sparse" C=1'
+
+__myscp() {
+	ldd $(which "$1")
+	scp $(which "$1") "$2$(which $1)"
+}
+alias myscp=__myscp
+
+alias sound=alsamixer
+
+alias kcompile='echo "smatch, first do make modules_prepare in linux, gcc6 disable -no-pie, -fno-pie"'
+alias rsmatch='make CHECK="~/Projects/smatch/smatch --full-path" CC=~/Projects/smatch/cgcc'
+alias rsparse='make C=2 '
+
+alias mono='export MONOREPO_ROOT=$(git rev-parse --show-toplevel)'
+alias lisa='source $(git rev-parse --show-toplevel)/docker-alias.sh'
+
+alias modmake='make -C ../linux/linux-4.1.19/ M=$PWD EXTRA_CFLAGS=-DENABLE_TEXTLOG modules'
+
+__vmip() {
+	local addr=$(vm show partha-esb2001-2 | awk  '/IP: / {print $2}')
+	echo "$addr"
+}
+__vmlog() {
+	local addr=$(__vmip)
+	ssh root@$addr
+}
+alias vmip=__vmip
+alias vmlog=__vmlog
+
+__git_sed_strip() {
+	git log --pretty=format:%s%n%b -n 1 | sed  s/$1.*/------------------------/
+}
+alias git_sed_strip=__git_sed_strip
+
+__sync_modules() {
+	scp $(find . -name \*.ko) pm3:~/modules/
+}
+alias sync_modules=__sync_modules
+
+__get_dump() {
+	if [ $# -ne 1 ]; then
+		echo "$0 <node_ip>"
+		return
+	fi
+
+	local DEST="./dumps"
+	mkdir -p $DEST
+	scp $1:"/non-volatile/kdump/*" $DEST
+	scp $1:"/var/kdump/*" $DEST
+	scp $1:"/non-volatile/log/dmesg" $DEST
+	for files in $(ls $DEST/*.tgz); do
+		local filename=$(basename -- "$files")
+		echo unpacking $files
+		tar --one-top-level -axvf $files;
+		echo crash dumps/vmlinux "${filename%.*}"/tmp/vmcore
+	done
+}
+alias get_dump=__get_dump
+
+__git_rebase_run() {
+	git rebase $1 --exec "bash ~/monorepo/docker.sh make"
+}
+alias git_rebase_run='__git_rebase_run'
+
+__do_ssh() {
+	hostname=$(ssh -G $1 | awk '/^hostname/{print $2}')
+
+    if [[ "$hostname" == "$1" ]]; then
+        echo "Can't lookup host '$1' in ssh config"
+        return 1
+    fi
+
+	nc -z -v -w 240 $hostname 22 && ssh $1 $2
+}
+alias do_ssh=__do_ssh
+alias gs="git status"
+
+__lfs_fix() {
+	local MONOREPO_ROOT=$(git rev-parse --show-toplevel)
+
+	echo > "$MONOREPO_ROOT/.gitattributes"
+	git status
+	git -C "$MONOREPO_ROOT" checkout -- .gitattributes
+	git status
+}
+alias lfs_fix=__lfs_fix
+
+alias old_mount="sudo mount /dev/sda2 /home/partha/old_fs/"
+
+__link_old_fs() {
+	if ! grep sda2 /proc/mounts; then
+		old_mount
+	fi
+	ln -s /home/partha/old_fs/home/parbhu/Projects/ /home/partha/Projects
+#	ln -s ~/ /home/partha/old_fs/home/parbhu/Projects/
+}
+alias link_old_fs=__link_old_fs
+alias refresh="sudo apt-get update && sudo apt-get --yes dist-upgrade"
+alias mountall="sudo mount -a -T ~/bin/my_fstab"
+__gdb_cmd() {
+	local cmd_file=~/"gdb_commands/cmd"
+	echo "info line *$1" > $cmd_file
+	gdb -x $cmd_file --batch $2
+}
+alias gdb_file=__gdb_cmd
+alias mywinman="sudo update-alternatives --config x-window-manager"
+alias to_print="ftp 192.168.99.64"
+
+alias cd_ehsd="cd ~/monorepo/src/esb2001/local/httpd/ehs"
+__apply() {
+	if [ $# -ne 1 ]; then
+		echo "$0 <node_ip>"
+		return
+	fi
+
+	ssh $1 service ehsd stop
+	scp objs/strontium-e-debug/ehsd_unstripped $1:/usr/bin/ehsd
+	ssh $1 service ehsd start
+}
+alias reload_ehsd=__apply
+__patch_platform() {
+    if [ $# -ne 1 ]; then
+        echo "$0 <node_ip>"
+        return
+    fi
+
+    NODE="root@$1"
+
+	local PREFIX=/non-volatile/patches/platform
+	local NAME="$PREFIX"_"$(git describe --dirty --tags --match esb2001*)"
+    local DIRS="lib/modules/4.9.110 lib/firmware usr/bin/ usr/sbin"
+
+	# remove older patches with this prefix
+	ssh $NODE "rm -rf $PREFIX*"
+    ssh $NODE "mkdir -p $NAME/ && cd $NAME/ && mkdir -p $DIRS"
+
+    cd $(git rev-parse --show-toplevel)/src/platform/drivers
+    docker-make TARGET=strontium-e -j $(nproc) && docker-make -C ../tools/ TARGET=strontium-e -j $(nproc)
+
+	# copy the binary artifacts to node
+    scp -r */*.ko $NODE:$NAME/lib/modules/4.9.110/
+    scp ../firmware/abra-e/abra2-e.rbf $NODE:$NAME/lib/firmware/
+	
+    scp ../tools/test/streamtest/objs/strontium-e-debug/streamtest $NODE:$NAME/usr/bin/
+    scp ../tools/test/livestreamtest/objs/strontium-e-debug/livestreamtest $NODE:$NAME/usr/bin/
+    scp ../tools/abratool/objs/strontium-e-debug/abra $NODE:$NAME/usr/sbin/
+
+	# do a fast reboot
+	ssh $NODE "/usr/sbin/reboot-skip-bios"
+
+	printf "\n\npatched $1 at $NAME\n"
+	cd - >&/dev/null
+}
+alias patch_platform=__patch_platform
+__diffme() {
+    if [ $# -lt 2 ]; then
+		echo "diffme <end> <start>"
+		return
+	fi
+	local res=$(($1-$2))
+	printf "%d:0x%x\n" $res $res
+}
+alias diffme=__diffme
+__tcpsniff() { 
+    tcpdump -s 128 -vvv -XX -A -r $1
+}
+alias tcpsniff=__tcpsniff
+
+__log_periodic() {
+        while true; do date +"%y%m%d %2H%2M%2S:%3N"; "$1"; echo ; sleep 0.05; done
+}
+alias log_periodic=__log_periodic
+

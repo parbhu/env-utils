@@ -1,7 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =5
-let g:netrw_dirhist_1='/home/qparbhu/Downloads/CBAJIT/468/2nd/pcap/var/log/PL-3'
-let g:netrw_dirhist_2='/home/qparbhu/Downloads/CBAJIT/488/2017-05-11_22:10:20/systemlogs/SC-2'
-let g:netrw_dirhist_3='/home/qparbhu/Downloads/CBAJIT/544/2017-06-01_02:12:16/systemlogs/PL-7'
-let g:netrw_dirhist_4='/home/qparbhu/Downloads/CBAJIT/563/elektroff/2017-05-31_21:46:12/systemlogs/PL-8'
-let g:netrw_dirhist_5='/home/qparbhu/Downloads/CBAJIT/544/with_black2/2017-06-08_21:26:15/temp/systemlogs/SC-2'
